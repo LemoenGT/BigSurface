@@ -7,14 +7,31 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+
       - name: Use latest commit of my VoodooGPIO fork
         run: git submodule update --init --remote Dependencies/VoodooGPIO
-      - name: Fetch Lilu (needed to build)
-        run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || true
+
+      - name: Fetch Lilu + VirtualSMC SDKs
+        run: |
+          for repo in Lilu VirtualSMC; do
+            url=$(curl -s https://api.github.com/repos/acidanthera/$repo/releases/latest | grep -o 'https://[^"]*DEBUG.zip' | head -1)
+            echo "$repo: $url"
+            curl -sL -o $repo.zip "$url" && unzip -qo $repo.zip -d $repo-dl
+          done
+          find Lilu-dl VirtualSMC-dl -maxdepth 3 \( -name "Lilu.kext" -o -name "VirtualSMC.kext" \) | while read -r k; do
+            cp -R "$k" . ; cp -R "$k" BigSurface/
+          done
+          ls -d *.kext BigSurface/*.kext
+
+      - name: Show where BigSurface looks for SDKs
+        run: grep -n "HEADER_SEARCH_PATHS\|Lilu\|VirtualSMC" BigSurface/BigSurface.xcodeproj/project.pbxproj | head -30
+
       - name: Show build targets
         run: xcodebuild -list -workspace BigSurface.xcworkspace
+
       - name: Build
         run: xcodebuild -workspace BigSurface.xcworkspace -scheme BigSurface -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+
       - uses: actions/upload-artifact@v4
         with:
           name: BigSurface
