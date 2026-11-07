@@ -1,0 +1,21 @@
+name: Build BigSurface
+on: [workflow_dispatch, push]
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Use latest commit of my VoodooGPIO fork
+        run: git submodule update --init --remote Dependencies/VoodooGPIO
+      - name: Fetch Lilu (needed to build)
+        run: src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/Lilu/master/Lilu/Scripts/bootstrap.sh) && eval "$src" || true
+      - name: Show build targets
+        run: xcodebuild -list -workspace BigSurface.xcworkspace
+      - name: Build
+        run: xcodebuild -workspace BigSurface.xcworkspace -scheme BigSurface -configuration Release -derivedDataPath build CODE_SIGNING_ALLOWED=NO
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BigSurface
+          path: build/Build/Products/Release/*.kext
