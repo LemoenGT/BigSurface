@@ -19,7 +19,7 @@ jobs:
             curl -sL -o $repo.zip "$url" && unzip -qo $repo.zip -d $repo-dl
           done
           find Lilu-dl VirtualSMC-dl -maxdepth 3 \( -name "Lilu.kext" -o -name "VirtualSMC.kext" \) | while read -r k; do
-            cp -R "$k" . ; cp -R "$k" BigSurface/
+              cp -R "$k" . ; cp -R "$k" BigSurface/ ; cp -R "$k" Dependencies/
           done
           ls -d *.kext BigSurface/*.kext
 
