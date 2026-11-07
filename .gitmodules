@@ -4,6 +4,7 @@
 [submodule "Dependencies/VoodooGPIO"]
 	path = Dependencies/VoodooGPIO
 	url = https://github.com/LemoenGT/VoodooGPIO.git
+	branch = master
 [submodule "Dependencies/VoodooSerial"]
 	path = Dependencies/VoodooSerial
 	url = https://github.com/Xiashangning/VoodooSerial.git
