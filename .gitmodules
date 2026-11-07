@@ -3,7 +3,7 @@
 	url = https://github.com/acidanthera/MacKernelSDK
 [submodule "Dependencies/VoodooGPIO"]
 	path = Dependencies/VoodooGPIO
-	url = https://github.com/Xiashangning/VoodooGPIO.git
+	url = https://github.com/LemoenGT/VoodooGPIO.git
 [submodule "Dependencies/VoodooSerial"]
 	path = Dependencies/VoodooSerial
 	url = https://github.com/Xiashangning/VoodooSerial.git
