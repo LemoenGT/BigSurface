@@ -16,10 +16,11 @@ jobs:
           find Dependencies/VoodooSerial -name Info.plist -exec sed -i '' 's/0x34a88086 0x9d278086/0x34a88086 0x9d278086 0xa0a88086/' {} \;
           grep -rn "a0a8" Dependencies/VoodooSerial --include=Info.plist
 
-      - name: Enable UART clock on Tiger Lake (same as Ice Lake)
+      - name: Tiger Lake UART clock (100 MHz in, 16/25 -> 64 MHz -> 4 Mbaud)
         run: |
-          find Dependencies/VoodooSerial -name VoodooUARTController.cpp -exec sed -i '' 's/if (device.device_id == 0x34a8)/if (device.device_id == 0x34a8 || device.device_id == 0xa0a8)/' {} \;
-          grep -rn "0xa0a8" Dependencies/VoodooSerial --include=VoodooUARTController.cpp
+          U=$(find Dependencies/VoodooSerial -name VoodooUARTController.cpp)
+          perl -0pi -e 's/(    else if \(device\.device_id == 0x9d27\)\n)/    else if (device.device_id == 0xa0a8)\n        writeRegister(UART_UPDATE_CLK | CALC_CLK(16, 25) | UART_ENABLE_CLK, LPSS_PRIV + LPSS_UART_CLK);\n$1/' "$U"
+          grep -n -A1 "0xa0a8" "$U"
 
       - name: Add debug properties
         run: |
