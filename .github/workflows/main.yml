@@ -33,9 +33,11 @@ jobs:
           grep -n "dbg-" "$U" "$H"
 
       - name: Fetch Lilu + VirtualSMC SDKs
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          curl -sL -o Lilu.zip https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-DEBUG.zip
-          curl -sL -o VirtualSMC.zip https://github.com/acidanthera/VirtualSMC/releases/download/1.3.8/VirtualSMC-1.3.8-DEBUG.zip
+          gh release download 1.7.2 -R acidanthera/Lilu -p '*DEBUG.zip' -O Lilu.zip --clobber
+          gh release download 1.3.8 -R acidanthera/VirtualSMC -p '*DEBUG.zip' -O VirtualSMC.zip --clobber
           unzip -qo Lilu.zip -d Lilu-dl
           unzip -qo VirtualSMC.zip -d VirtualSMC-dl
           find Lilu-dl VirtualSMC-dl -maxdepth 3 \( -name "Lilu.kext" -o -name "VirtualSMC.kext" \) | while read -r k; do
