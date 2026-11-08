@@ -16,6 +16,11 @@ jobs:
           find Dependencies/VoodooSerial -name Info.plist -exec sed -i '' 's/0x34a88086 0x9d278086/0x34a88086 0x9d278086 0xa0a88086/' {} \;
           grep -rn "a0a8" Dependencies/VoodooSerial --include=Info.plist
 
+      - name: Enable UART clock on Tiger Lake (same as Ice Lake)
+        run: |
+          find Dependencies/VoodooSerial -name VoodooUARTController.cpp -exec sed -i '' 's/if (device.device_id == 0x34a8)/if (device.device_id == 0x34a8 || device.device_id == 0xa0a8)/' {} \;
+          grep -rn "0xa0a8" Dependencies/VoodooSerial --include=VoodooUARTController.cpp
+
       - name: Fetch Lilu + VirtualSMC SDKs
         run: |
           curl -sL -o Lilu.zip https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-DEBUG.zip
