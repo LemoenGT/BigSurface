@@ -21,6 +21,17 @@ jobs:
           find Dependencies/VoodooSerial -name VoodooUARTController.cpp -exec sed -i '' 's/if (device.device_id == 0x34a8)/if (device.device_id == 0x34a8 || device.device_id == 0xa0a8)/' {} \;
           grep -rn "0xa0a8" Dependencies/VoodooSerial --include=VoodooUARTController.cpp
 
+      - name: Add debug properties
+        run: |
+          U=$(find Dependencies/VoodooSerial -name VoodooUARTController.cpp)
+          H=$(find BigSurface -name SurfaceSerialHubDriver.cpp)
+          perl -0pi -e 's/(void VoodooUARTController::startUARTClock\(\) \{\n)/$1    setProperty("dbg-devid", device.device_id, 16);\n/' "$U"
+          perl -0pi -e 's/(\n    if \(bus\.flow_control\) \{\n)/\n    setProperty("dbg-baud", bus.baud_rate, 32);\n    setProperty("dbg-flow", bus.flow_control ? 1ULL : 0ULL, 32);\n    setProperty("dbg-clk", readRegister(LPSS_PRIV + LPSS_UART_CLK), 32);\n    setProperty("dbg-msr", readRegister(DW_UART_MSR), 32);\n    setProperty("dbg-lsr", readRegister(DW_UART_LSR), 32);$1/' "$U"
+          perl -0pi -e 's/(LOG\("Warning! Timeout waiting for UART to be ready!"\);)/$1 setProperty("dbg-cts-timeout", true);/' "$U"
+          perl -0pi -e 's/(        if \(handler\)\n)/        { static UInt32 dbg_rx = 0; dbg_rx += length; setProperty("dbg-rx-bytes", dbg_rx, 32); }\n$1/' "$U"
+          perl -0pi -e 's/(LOG\("Failed to connect to UART controller!"\);)/$1 provider->setProperty("dbg-hub", "connect-failed");/; s/(LOG\("Failed to get SAM version! UART probably misconfigured!"\);)/$1 provider->setProperty("dbg-hub", "sam-timeout");/' "$H"
+          grep -n "dbg-" "$U" "$H"
+
       - name: Fetch Lilu + VirtualSMC SDKs
         run: |
           curl -sL -o Lilu.zip https://github.com/acidanthera/Lilu/releases/download/1.7.2/Lilu-1.7.2-DEBUG.zip
